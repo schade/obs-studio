@@ -23,3 +23,18 @@ RUN cd ./obs-studio/ && make -j4
 RUN cd ./obs-studio/ && sudo checkinstall --pkgname=FFmpeg --fstrans=no --backup=no --pkgversion="$(date +%Y%m%d)-git" --deldoc=yes
 RUN wget http://download.nomachine.com/download/5.1/Linux/nomachine_5.1.9_6_amd64.deb
 RUN sudo dpkg -i ./nomachine_5.1.9_6_amd64.deb
+
+RUN mkdir "$HOME/.vnc" && chmod go-rwx "$HOME/.vnc" ; 
+
+# Configurazione
+COPY vncserver        /etc/init.d/vncserver
+COPY vncservers.conf  /etc/vncserver/vncservers.conf
+COPY startup          /home/realtebo/.vnc/xstartup
+
+RUN \
+    /bin/bash -c "echo -e 'password\npassword\nn' | vncpasswd"; echo; \
+    sudo chown realtebo:realtebo ~/.vnc/xstartup; \
+    sudo chmod +x ~/.vnc/xstartup; \
+    touch ~/.Xauthority ;
+
+ENTRYPOINT export USER=realtebo; export DISPLAY=1; vncserver :1 && /bin/bash
