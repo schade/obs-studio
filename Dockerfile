@@ -1,6 +1,6 @@
 #WOO COMMENTS
 FROM debian:testing
-MAINTAINER Pyromancer <pyromancer@fireinthedeep.com>
+MAINTAINER Schade <schade@acommitteeoflunatics.net>
 RUN apt-get update && apt-get install -y build-essential pkg-config cmake git checkinstall software-properties-common sudo wget
 RUN add-apt-repository non-free
 RUN add-apt-repository contrib
@@ -21,20 +21,18 @@ RUN cd ./obs-studio && mkdir ./build
 RUN cd ./obs-studio/ && cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=/usr
 RUN cd ./obs-studio/ && make -j4
 RUN cd ./obs-studio/ && sudo checkinstall --pkgname=FFmpeg --fstrans=no --backup=no --pkgversion="$(date +%Y%m%d)-git" --deldoc=yes
-RUN wget http://download.nomachine.com/download/5.1/Linux/nomachine_5.1.9_6_amd64.deb
-RUN sudo dpkg -i ./nomachine_5.1.9_6_amd64.deb
 
+# VNC Configuration
 RUN mkdir "$HOME/.vnc" && chmod go-rwx "$HOME/.vnc" ; 
 
-# Configurazione
 COPY vncserver        /etc/init.d/vncserver
 COPY vncservers.conf  /etc/vncserver/vncservers.conf
-COPY startup          /home/realtebo/.vnc/xstartup
+COPY startup          /home/obs/.vnc/xstartup
 
 RUN \
     /bin/bash -c "echo -e 'password\npassword\nn' | vncpasswd"; echo; \
-    sudo chown realtebo:realtebo ~/.vnc/xstartup; \
+    sudo chown obs:obs ~/.vnc/xstartup; \
     sudo chmod +x ~/.vnc/xstartup; \
     touch ~/.Xauthority ;
 
-ENTRYPOINT export USER=realtebo; export DISPLAY=1; vncserver :1 && /bin/bash
+ENTRYPOINT export USER=obs; export DISPLAY=1; vncserver :1 && /bin/bash
